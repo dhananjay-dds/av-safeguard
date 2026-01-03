@@ -3,6 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AV Safeguard V2.2</title>
     <style>
         body {
@@ -12,6 +13,9 @@
             padding: 20px;
             display: flex;
             justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            box-sizing: border-box;
         }
 
         .container {
@@ -22,12 +26,14 @@
             width: 100%;
             border: 1px solid #233554;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            box-sizing: border-box;
         }
 
         h1 {
             color: #D4AF37;
             text-align: center;
             margin-bottom: 30px;
+            line-height: 1.2;
         }
 
         .grid {
@@ -53,7 +59,8 @@
             color: white;
             border-radius: 6px;
             box-sizing: border-box;
-            font-size: 1rem;
+            font-size: 16px;
+            /* 16px prevents iOS zoom */
         }
 
         ::placeholder {
@@ -83,12 +90,11 @@
         /* THE RESULTS BOX */
         .result-box {
             margin-top: 30px;
-            padding: 25px;
+            padding: 20px;
             background: rgba(10, 25, 47, 0.8);
             border-radius: 8px;
             border: 1px solid #D4AF37;
             display: none;
-            /* Hidden by default */
             animation: fadeIn 0.5s ease-in;
         }
 
@@ -127,27 +133,53 @@
             font-weight: bold;
         }
 
-        /* THE MASSIVE PDF BUTTON */
         .pdf-btn {
             display: block;
             width: 100%;
             text-align: center;
             background-color: #64ffda;
-            /* Success Green */
             color: #0A192F;
-            padding: 18px;
+            padding: 16px;
             margin-top: 20px;
             border-radius: 8px;
             text-decoration: none;
             font-weight: 900;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             text-transform: uppercase;
             letter-spacing: 1px;
             box-shadow: 0 4px 15px rgba(100, 255, 218, 0.3);
+            box-sizing: border-box;
         }
 
-        .pdf-btn:hover {
-            background-color: #4cd6b3;
+        /* --- MOBILE OPTIMIZATION --- */
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                padding: 1.5rem;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+
+            /* Stack inputs vertically */
+            h1 {
+                font-size: 1.5rem;
+                margin-top: 0;
+            }
+
+            .stat-row {
+                font-size: 0.9rem;
+            }
+
+            .pdf-btn {
+                font-size: 1rem;
+                padding: 14px;
+            }
         }
     </style>
 </head>
@@ -174,8 +206,8 @@
             <div><label>Screen Width</label><input type="number" id="screenWidth" value="3.5"></div>
             <div><label>Aspect Ratio</label>
                 <select id="aspect">
-                    <option value="1.777">16:9 (TV Standard)</option>
-                    <option value="2.35">2.35:1 (CinemaScope)</option>
+                    <option value="1.777">16:9 (Standard TV)</option>
+                    <option value="2.35">2.35:1 (Widescreen Cinema)</option>
                 </select>
             </div>
         </div>
@@ -271,7 +303,7 @@
                 const resultsDiv = document.getElementById('results');
                 resultsDiv.style.display = 'block';
 
-                // 🚀 AUTO-SCROLL TO RESULTS 🚀
+                // AUTO-SCROLL
                 resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
                 document.getElementById('res-bright').innerHTML = `<span class="${getStatusClass(result.calculations.brightness_status)}">${result.calculations.ftl} fL (${result.calculations.brightness_status})</span>`;
