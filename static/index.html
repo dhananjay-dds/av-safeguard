@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AV Safeguard V2.2</title>
+    <title>Design Safeguard V3 (Physics Engine)</title>
     <style>
         body {
             font-family: 'Segoe UI', sans-serif;
@@ -26,14 +26,22 @@
             width: 100%;
             border: 1px solid #233554;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            box-sizing: border-box;
         }
 
         h1 {
             color: #D4AF37;
             text-align: center;
             margin-bottom: 30px;
-            line-height: 1.2;
+        }
+
+        h3 {
+            color: #64ffda;
+            border-bottom: 1px solid #233554;
+            padding-bottom: 5px;
+            margin-top: 25px;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .grid {
@@ -44,31 +52,23 @@
 
         label {
             display: block;
-            margin-top: 15px;
+            margin-top: 10px;
             color: #8892b0;
-            font-size: 0.9em;
+            font-size: 0.85em;
             font-weight: 500;
         }
 
         input,
         select {
             width: 100%;
-            padding: 12px;
+            padding: 10px;
             background: #0A192F;
             border: 1px solid #233554;
             color: white;
             border-radius: 6px;
             box-sizing: border-box;
-            font-size: 16px;
-            /* 16px prevents iOS zoom */
         }
 
-        ::placeholder {
-            color: #556080;
-            opacity: 1;
-        }
-
-        /* THE MAIN ACTION BUTTON */
         .run-btn {
             width: 100%;
             margin-top: 30px;
@@ -87,7 +87,6 @@
             transform: scale(1.02);
         }
 
-        /* THE RESULTS BOX */
         .result-box {
             margin-top: 30px;
             padding: 20px;
@@ -95,19 +94,6 @@
             border-radius: 8px;
             border: 1px solid #D4AF37;
             display: none;
-            animation: fadeIn 0.5s ease-in;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
         }
 
         .stat-row {
@@ -144,12 +130,9 @@
             border-radius: 8px;
             text-decoration: none;
             font-weight: 900;
-            font-size: 1.1rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            box-shadow: 0 4px 15px rgba(100, 255, 218, 0.3);
             box-sizing: border-box;
         }
+
 
         /* --- MOBILE OPTIMIZATION --- */
         @media (max-width: 600px) {
@@ -158,15 +141,22 @@
             }
 
             .container {
-                padding: 1.5rem;
+                padding: 1rem;
             }
 
+            /* FORCE ALL GRIDS TO STACK VERTICALLY */
             .grid {
-                grid-template-columns: 1fr;
-                gap: 0;
+                grid-template-columns: 1fr !important;
+                gap: 10px;
             }
 
-            /* Stack inputs vertically */
+            /* Fix the Client/Project Inputs */
+            #clientName,
+            #projectName {
+                width: 100%;
+                margin-bottom: 5px;
+            }
+
             h1 {
                 font-size: 1.5rem;
                 margin-top: 0;
@@ -186,84 +176,89 @@
 
 <body>
     <div class="container">
-        <h1>Design Safeguard <span style="font-size:0.5em; opacity:0.6">V2.2</span></h1>
+        <h1>Design Safeguard <span style="font-size:0.5em; opacity:0.6">V3.0</span></h1>
 
-        <label>Client Name</label><input type="text" id="clientName" placeholder="e.g. Smith Residence">
-        <label>Project Name</label><input type="text" id="projectName" placeholder="e.g. Cinema Room">
-        <label>Integrator / Company</label><input type="text" id="integratorName" placeholder="e.g. Your Company Name">
+        <div class="grid">
+            <div>
+                <label>Client Name</label>
+                <input type="text" id="clientName" placeholder="e.g. Smith Residence">
+            </div>
+            <div>
+                <label>Project Name</label>
+                <input type="text" id="projectName" placeholder="e.g. Cinema Room">
+            </div>
+        </div>
+        <label>Integrator / Company</label>
+        <input type="text" id="integratorName" placeholder="e.g. Your Company Name">
 
-        <label>Unit Standard</label>
-        <select id="unit">
+
+        <h3>1. Room Dimensions</h3>
+        <label>Unit Standard</label><select id="unit">
             <option value="Meters">Metric (Meters)</option>
             <option value="Feet">Imperial (Feet)</option>
         </select>
-
         <div class="grid">
             <div><label>Room Depth</label><input type="number" id="length" value="6.0"></div>
             <div><label>Room Width</label><input type="number" id="width" value="4.5"></div>
         </div>
+        <div><label>Room Height (Important for Audio)</label><input type="number" id="height" value="3.0"></div>
+
+        <h3>2. Screen & Projector</h3>
         <div class="grid">
             <div><label>Screen Width</label><input type="number" id="screenWidth" value="3.5"></div>
-            <div><label>Aspect Ratio</label>
-                <select id="aspect">
-                    <option value="1.777">16:9 (Standard TV)</option>
-                    <option value="2.35">2.35:1 (Widescreen Cinema)</option>
-                </select>
-            </div>
+            <div><label>Aspect Ratio</label><select id="aspect">
+                    <option value="1.777">16:9 (TV)</option>
+                    <option value="2.35">2.35:1 (Cinema)</option>
+                </select></div>
+        </div>
+        <div class="grid">
+            <div><label>Screen Gain</label><input type="number" id="screenGain" value="1.0" step="0.1"></div>
+            <div><label>Proj Lumens</label><input type="number" id="lumens" value="2500"></div>
         </div>
         <div class="grid">
             <div><label>Min Throw Ratio</label><input type="number" id="trMin" value="1.4"></div>
             <div><label>Max Throw Ratio</label><input type="number" id="trMax" value="2.8"></div>
         </div>
-        <div class="grid">
-            <div><label>Seat Dist</label><input type="number" id="seatDist" value="4.5"></div>
-            <div><label>Ambient Light</label>
-                <select id="light">
-                    <option value="Dark Theater">Dark Theater (0 Lux)</option>
-                    <option value="Media Room">Media Room (Some Light)</option>
-                    <option value="Living Room">Living Room (Bright)</option>
-                </select>
-            </div>
-        </div>
-        <label>Projector Lumens</label><input type="number" id="lumens" value="2500">
 
-        <button class="run-btn" onclick="runCheck()">RUN PHYSICS AUDIT</button>
+        <h3>3. Seating & Audio (V3 New)</h3>
+        <div class="grid">
+            <div><label>Seat Distance</label><input type="number" id="seatDist" value="4.5"></div>
+            <div><label>Sofa Width</label><input type="number" id="sofaWidth" value="3.0"></div>
+        </div>
+        <div class="grid">
+            <div><label>Center Spkr Ht (Floor)</label><input type="number" id="spkrHeight" value="0.5"></div>
+            <div><label>Ear Height</label><input type="number" id="earHeight" value="1.1"></div>
+        </div>
+
+        <button class="run-btn" onclick="runCheck()">RUN V3 PHYSICS AUDIT</button>
 
         <div id="results" class="result-box">
-            <h3 style="color:#D4AF37; margin-top:0; border-bottom:1px solid #D4AF37; padding-bottom:10px;">Audit Results
-            </h3>
-            <div class="stat-row"><span>Brightness:</span> <span id="res-bright">--</span></div>
+            <h3 style="color:#D4AF37; margin-top:0;">Audit Results</h3>
             <div class="stat-row"><span>Throw Distance:</span> <span id="res-throw">--</span></div>
-            <div class="stat-row"><span>Viewing Angle:</span> <span id="res-angle">--</span></div>
-
-            <a id="pdf-link" href="#" target="_blank" class="pdf-btn">
-                OPEN ENGINEERING REPORT ↗
-            </a>
+            <div class="stat-row"><span>Brightness:</span> <span id="res-bright">--</span></div>
+            <div class="stat-row"><span>Off-Axis Seating:</span> <span id="res-offaxis">--</span></div>
+            <div class="stat-row"><span>Audio Vert Angle:</span> <span id="res-audio">--</span></div>
+            <a id="pdf-link" href="#" target="_blank" class="pdf-btn">OPEN V3 ENGINEERING REPORT &#x2197;</a>
         </div>
     </div>
 
     <script>
-        // Unit Switcher
         document.getElementById('unit').addEventListener('change', function () {
             if (this.value === "Feet") {
-                document.getElementById('length').value = "20";
-                document.getElementById('width').value = "15";
-                document.getElementById('screenWidth').value = "10";
-                document.getElementById('seatDist').value = "14";
+                document.getElementById('length').value = "20"; document.getElementById('width').value = "15"; document.getElementById('height').value = "10";
+                document.getElementById('screenWidth').value = "11.5"; document.getElementById('seatDist').value = "14";
+                document.getElementById('sofaWidth').value = "10"; document.getElementById('spkrHeight').value = "2"; document.getElementById('earHeight').value = "3.5";
             } else {
-                document.getElementById('length').value = "6.0";
-                document.getElementById('width').value = "4.5";
-                document.getElementById('screenWidth').value = "3.5";
-                document.getElementById('seatDist').value = "4.5";
+                document.getElementById('length').value = "6.0"; document.getElementById('width').value = "4.5"; document.getElementById('height').value = "3.0";
+                document.getElementById('screenWidth').value = "3.5"; document.getElementById('seatDist').value = "4.5";
+                document.getElementById('sofaWidth').value = "3.0"; document.getElementById('spkrHeight').value = "0.5"; document.getElementById('earHeight').value = "1.1";
             }
         });
 
         async function runCheck() {
             const btn = document.querySelector('.run-btn');
-            const originalText = btn.innerText;
             btn.innerText = "CALCULATING...";
 
-            // Gather Data
             const data = {
                 client_name: document.getElementById('clientName').value,
                 project_name: document.getElementById('projectName').value,
@@ -271,16 +266,17 @@
                 measurement_unit: document.getElementById('unit').value,
                 length: parseFloat(document.getElementById('length').value),
                 width: parseFloat(document.getElementById('width').value),
-                height: 3.0,
+                height: parseFloat(document.getElementById('height').value),
                 screen_width: parseFloat(document.getElementById('screenWidth').value),
                 screen_aspect_ratio: parseFloat(document.getElementById('aspect').value),
+                screen_gain: parseFloat(document.getElementById('screenGain').value),
                 projector_lumens: parseInt(document.getElementById('lumens').value),
                 throw_ratio_min: parseFloat(document.getElementById('trMin').value),
                 throw_ratio_max: parseFloat(document.getElementById('trMax').value),
                 seating_distance: parseFloat(document.getElementById('seatDist').value),
-                screen_gain: 1.0,
-                screen_mount_offset: 0.5,
-                ambient_light: document.getElementById('light').value
+                sofa_width: parseFloat(document.getElementById('sofaWidth').value),
+                center_speaker_height: parseFloat(document.getElementById('spkrHeight').value),
+                ear_height: parseFloat(document.getElementById('earHeight').value)
             };
 
             try {
@@ -289,40 +285,23 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
                 });
-
-                if (!response.ok) {
-                    const txt = await response.text();
-                    alert("SERVER ERROR: " + txt);
-                    btn.innerText = "TRY AGAIN";
-                    return;
-                }
-
+                if (!response.ok) throw new Error(await response.text());
                 const result = await response.json();
 
-                // Show Results
-                const resultsDiv = document.getElementById('results');
-                resultsDiv.style.display = 'block';
+                const r = result.calculations;
+                document.getElementById('res-throw').innerHTML = `<span class="${r.throw_status === 'PASS' ? 'pass' : 'fail'}">${r.throw_status}</span>`;
+                document.getElementById('res-bright').innerHTML = `<span class="${r.brightness_status === 'PASS' ? 'pass' : 'warn'}">${r.ftl} fL (${r.brightness_status})</span>`;
+                document.getElementById('res-offaxis').innerHTML = `<span class="${r.off_axis_status === 'PASS' ? 'pass' : 'fail'}">${r.off_axis_status}</span>`;
+                document.getElementById('res-audio').innerHTML = `<span class="${r.audio_status === 'PASS' ? 'pass' : 'fail'}">${r.audio_status}</span>`;
 
-                // AUTO-SCROLL
-                resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-                document.getElementById('res-bright').innerHTML = `<span class="${getStatusClass(result.calculations.brightness_status)}">${result.calculations.ftl} fL (${result.calculations.brightness_status})</span>`;
-                document.getElementById('res-throw').innerHTML = `<span class="${result.calculations.throw_status === 'PASS' ? 'pass' : 'fail'}">${result.calculations.throw_status}</span>`;
-                document.getElementById('res-angle').innerHTML = `<span class="${result.calculations.angle_status === 'PASS' ? 'pass' : 'warn'}">${result.calculations.viewing_angle}° (${result.calculations.angle_status})</span>`;
                 document.getElementById('pdf-link').href = "/" + result.pdf_url;
-
-                btn.innerText = originalText;
-
+                document.getElementById('results').style.display = 'block';
+                document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+                btn.innerText = "RUN V3 PHYSICS AUDIT";
             } catch (e) {
-                alert("BROWSER ERROR: " + e.message);
-                btn.innerText = "ERROR";
+                alert("ERROR: " + e.message);
+                btn.innerText = "ERROR - TRY AGAIN";
             }
-        }
-
-        function getStatusClass(status) {
-            if (status.includes("PASS")) return "pass";
-            if (status.includes("WARNING")) return "warn";
-            return "fail";
         }
     </script>
 </body>
