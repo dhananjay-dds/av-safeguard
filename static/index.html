@@ -4,42 +4,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Design Safeguard V3 (Physics Engine)</title>
+    <title>AV Safeguard: Consultant Edition</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background: #0A192F;
-            color: #CCD6F6;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            min-height: 100vh;
-            margin: 0;
-            box-sizing: border-box;
+        :root {
+            --bg-dark: #0f172a;
+            --card-dark: #1e293b;
+            --text-light: #f8fafc;
+            --accent-gold: #fbbf24;
+            --accent-blue: #38bdf8;
+            --danger: #ef4444;
+            --success: #22c55e;
         }
 
-        .container {
-            background: #112240;
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            margin: 0;
             padding: 2rem;
-            border-radius: 12px;
-            max-width: 600px;
-            width: 100%;
-            border: 1px solid #233554;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         h1 {
-            color: #D4AF37;
+            font-weight: 800;
+            color: var(--accent-gold);
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #94a3b8;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background-color: var(--card-dark);
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
         }
 
         h3 {
-            color: #64ffda;
-            border-bottom: 1px solid #233554;
-            padding-bottom: 5px;
-            margin-top: 25px;
-            font-size: 0.9em;
+            color: var(--accent-blue);
+            margin-top: 0;
+            font-size: 0.9rem;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
@@ -47,237 +61,254 @@
         .grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 15px;
+            gap: 1.5rem;
+        }
+
+        @media(max-width: 600px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         label {
             display: block;
-            margin-top: 10px;
-            color: #8892b0;
-            font-size: 0.85em;
-            font-weight: 500;
+            margin-top: 1rem;
+            font-size: 0.85rem;
+            color: #cbd5e1;
+            margin-bottom: 0.25rem;
         }
 
         input,
         select {
             width: 100%;
-            padding: 10px;
-            background: #0A192F;
-            border: 1px solid #233554;
+            background-color: #0f172a;
+            border: 1px solid #475569;
             color: white;
+            padding: 0.75rem;
             border-radius: 6px;
+            font-family: inherit;
             box-sizing: border-box;
         }
 
-        .run-btn {
+        input:focus,
+        select:focus {
+            outline: 2px solid var(--accent-blue);
+            border-color: transparent;
+        }
+
+        input[type="text"] {
+            border-color: #64748b;
+        }
+
+        .btn-main {
             width: 100%;
-            margin-top: 30px;
-            padding: 16px;
-            background: #D4AF37;
+            background-color: var(--accent-gold);
+            color: #1e293b;
+            font-weight: 800;
+            padding: 1rem;
             border: none;
-            border-radius: 6px;
-            font-weight: bold;
-            font-size: 1.1rem;
-            cursor: pointer;
-            color: #0A192F;
-            transition: transform 0.2s;
-        }
-
-        .run-btn:hover {
-            transform: scale(1.02);
-        }
-
-        .result-box {
-            margin-top: 30px;
-            padding: 20px;
-            background: rgba(10, 25, 47, 0.8);
             border-radius: 8px;
-            border: 1px solid #D4AF37;
-            display: none;
+            cursor: pointer;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: transform 0.1s;
         }
 
-        .stat-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 12px;
-            border-bottom: 1px solid #233554;
-            padding-bottom: 8px;
+        .btn-main:hover {
+            transform: scale(1.02);
+            background-color: #f59e0b;
         }
 
-        .pass {
-            color: #64ffda;
-            font-weight: bold;
-        }
-
-        .fail {
-            color: #ff5f5f;
-            font-weight: bold;
-        }
-
-        .warn {
-            color: #ffc107;
-            font-weight: bold;
-        }
-
-        .pdf-btn {
+        .btn-pdf {
             display: block;
             width: 100%;
             text-align: center;
-            background-color: #64ffda;
-            color: #0A192F;
-            padding: 16px;
-            margin-top: 20px;
+            background-color: var(--success);
+            color: white;
+            padding: 1rem;
             border-radius: 8px;
             text-decoration: none;
-            font-weight: 900;
+            font-weight: 800;
+            margin-top: 1rem;
             box-sizing: border-box;
         }
 
+        .btn-pdf:hover {
+            background-color: #16a34a;
+        }
 
-        /* --- MOBILE OPTIMIZATION --- */
-        @media (max-width: 600px) {
-            body {
-                padding: 10px;
-            }
+        #results {
+            display: none;
+            border-top: 4px solid var(--accent-gold);
+        }
 
-            .container {
-                padding: 1rem;
-            }
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #334155;
+        }
 
-            /* FORCE ALL GRIDS TO STACK VERTICALLY */
-            .grid {
-                grid-template-columns: 1fr !important;
-                gap: 10px;
-            }
+        .result-val {
+            font-weight: bold;
+        }
 
-            /* Fix the Client/Project Inputs */
-            #clientName,
-            #projectName {
-                width: 100%;
-                margin-bottom: 5px;
-            }
+        .pass {
+            color: var(--success);
+        }
 
-            h1 {
-                font-size: 1.5rem;
-                margin-top: 0;
-            }
+        .fail {
+            color: var(--danger);
+        }
 
-            .stat-row {
-                font-size: 0.9rem;
-            }
-
-            .pdf-btn {
-                font-size: 1rem;
-                padding: 14px;
-            }
+        .warn {
+            color: var(--accent-gold);
         }
     </style>
 </head>
 
 <body>
-    <div class="container">
-        <h1>Design Safeguard <span style="font-size:0.5em; opacity:0.6">V3.0</span></h1>
 
+    <h1>AV Safeguard V3.1</h1>
+    <p class="subtitle">Consultant-Grade Physics Engine • Merged Optical & Acoustic Validation</p>
+
+    <div class="card">
+        <h3>Project Identity</h3>
         <div class="grid">
-            <div>
-                <label>Client Name</label>
-                <input type="text" id="clientName" placeholder="e.g. Smith Residence">
-            </div>
-            <div>
-                <label>Project Name</label>
-                <input type="text" id="projectName" placeholder="e.g. Cinema Room">
+            <div><label>Client Name</label><input type="text" id="client_name" placeholder="e.g. Smith Residence"></div>
+            <div><label>Project Name</label><input type="text" id="project_name" placeholder="e.g. Reference Cinema">
             </div>
         </div>
-        <label>Integrator / Company</label>
-        <input type="text" id="integratorName" placeholder="e.g. Your Company Name">
+        <label>Integrator / Company</label><input type="text" id="integrator_name" placeholder="e.g. JSJ Smart Homes">
 
-
-        <h3>1. Room Dimensions</h3>
-        <label>Unit Standard</label><select id="unit">
-            <option value="Meters">Metric (Meters)</option>
-            <option value="Feet">Imperial (Feet)</option>
-        </select>
-        <div class="grid">
-            <div><label>Room Depth</label><input type="number" id="length" value="6.0"></div>
-            <div><label>Room Width</label><input type="number" id="width" value="4.5"></div>
-        </div>
-        <div><label>Room Height (Important for Audio)</label><input type="number" id="height" value="3.0"></div>
-
-        <h3>2. Screen & Projector</h3>
-        <div class="grid">
-            <div><label>Screen Width</label><input type="number" id="screenWidth" value="3.5"></div>
-            <div><label>Aspect Ratio</label><select id="aspect">
-                    <option value="1.777">16:9 (TV)</option>
-                    <option value="2.35">2.35:1 (Cinema)</option>
-                </select></div>
-        </div>
-        <div class="grid">
-            <div><label>Screen Gain</label><input type="number" id="screenGain" value="1.0" step="0.1"></div>
-            <div><label>Proj Lumens</label><input type="number" id="lumens" value="2500"></div>
-        </div>
-        <div class="grid">
-            <div><label>Min Throw Ratio</label><input type="number" id="trMin" value="1.4"></div>
-            <div><label>Max Throw Ratio</label><input type="number" id="trMax" value="2.8"></div>
-        </div>
-
-        <h3>3. Seating & Audio (V3 New)</h3>
-        <div class="grid">
-            <div><label>Seat Distance</label><input type="number" id="seatDist" value="4.5"></div>
-            <div><label>Sofa Width</label><input type="number" id="sofaWidth" value="3.0"></div>
-        </div>
-        <div class="grid">
-            <div><label>Center Spkr Ht (Floor)</label><input type="number" id="spkrHeight" value="0.5"></div>
-            <div><label>Ear Height</label><input type="number" id="earHeight" value="1.1"></div>
-        </div>
-
-        <button class="run-btn" onclick="runCheck()">RUN V3 PHYSICS AUDIT</button>
-
-        <div id="results" class="result-box">
-            <h3 style="color:#D4AF37; margin-top:0;">Audit Results</h3>
-            <div class="stat-row"><span>Throw Distance:</span> <span id="res-throw">--</span></div>
-            <div class="stat-row"><span>Brightness:</span> <span id="res-bright">--</span></div>
-            <div class="stat-row"><span>Off-Axis Seating:</span> <span id="res-offaxis">--</span></div>
-            <div class="stat-row"><span>Audio Vert Angle:</span> <span id="res-audio">--</span></div>
-            <a id="pdf-link" href="#" target="_blank" class="pdf-btn">OPEN V3 ENGINEERING REPORT &#x2197;</a>
+        <div style="margin-top: 1rem;">
+            <label>Measurement Unit</label>
+            <select id="unit" onchange="toggleUnits()">
+                <option value="Feet">Imperial (Feet, Inches)</option>
+                <option value="Meters">Metric (Meters, Centimeters)</option>
+            </select>
         </div>
     </div>
 
+    <div class="card">
+        <h3>1. Room & Acoustics</h3>
+        <div class="grid">
+            <div><label id="l_dim">Room Depth (ft)</label><input type="number" id="length" value="24"></div>
+            <div><label id="l_wid">Room Width (ft)</label><input type="number" id="width" value="16"></div>
+            <div><label id="l_hgt">Height (ft)</label><input type="number" id="height" value="10"></div>
+            <div>
+                <label>Wall Material (RT60)</label>
+                <select id="material">
+                    <option value="drywall_shell">Drywall Shell (Untreated)</option>
+                    <option value="concrete_glass">Concrete + Glass (Worst Case)</option>
+                    <option value="carpet_painted">Carpet + Painted Walls</option>
+                    <option value="treated_50">50% Acoustic Treatment</option>
+                    <option value="fully_treated">Fully Treated Cinema</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>2. Optical Geometry</h3>
+        <div class="grid">
+            <div><label id="l_scr">Screen Width (ft)</label><input type="number" id="screen_width" value="12"></div>
+            <div><label id="l_dist">Seating Dist (ft)</label><input type="number" id="seat_dist" value="14"></div>
+
+            <div><label id="l_scr_h">Screen Bottom from Floor (ft)</label><input type="number" id="screen_bottom"
+                    value="3.5"></div>
+
+            <div><label>Aspect Ratio</label>
+                <select id="aspect_ratio">
+                    <option value="1.777">16:9 (TV/Sports)</option>
+                    <option value="2.35">2.35:1 (CinemaScope)</option>
+                    <option value="2.40">2.40:1 (Widescreen)</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>3. Audio Alignment</h3>
+        <div class="grid">
+            <div><label id="l_ear">Ear Height (in)</label><input type="number" id="ear_height" value="42"></div>
+            <div><label id="l_spk_h">Center Spkr Height (in)</label><input type="number" id="tweet_height" value="32">
+            </div>
+
+            <div><label id="l_spk_off">Center Spkr Offset (in)</label><input type="number" id="speaker_offset"
+                    value="0"></div>
+        </div>
+    </div>
+
+    <button class="btn-main" onclick="generateReport()">Run Consultant-Grade Audit 🚀</button>
+
+    <div id="results" class="card">
+        <h3>Audit Results</h3>
+        <div class="result-row"><span>Throw Distance</span><span id="r_throw" class="result-val"></span></div>
+        <div class="result-row"><span>Brightness (fL)</span><span id="r_bright" class="result-val"></span></div>
+        <div class="result-row"><span>RT60 Reverb</span><span id="r_rt60" class="result-val"></span></div>
+        <div class="result-row"><span>Vert. Audio Angle</span><span id="r_spk_v" class="result-val"></span></div>
+        <div class="result-row"><span>Horiz. Audio Angle</span><span id="r_spk_h" class="result-val"></span></div>
+        <div class="result-row"><span>Ear Height</span><span id="r_ear" class="result-val"></span></div>
+
+        <div id="pdf_container"></div>
+    </div>
+
     <script>
-        document.getElementById('unit').addEventListener('change', function () {
-            if (this.value === "Feet") {
-                document.getElementById('length').value = "20"; document.getElementById('width').value = "15"; document.getElementById('height').value = "10";
-                document.getElementById('screenWidth').value = "11.5"; document.getElementById('seatDist').value = "14";
-                document.getElementById('sofaWidth').value = "10"; document.getElementById('spkrHeight').value = "2"; document.getElementById('earHeight').value = "3.5";
+        function toggleUnits() {
+            const isMetric = document.getElementById('unit').value === 'Meters';
+            const setTxt = (id, txt) => document.getElementById(id).innerText = txt;
+            const setVal = (id, val) => document.getElementById(id).value = val;
+
+            if (isMetric) {
+                setTxt('l_dim', 'Room Depth (m)'); setVal('length', 7.3);
+                setTxt('l_wid', 'Room Width (m)'); setVal('width', 4.8);
+                setTxt('l_hgt', 'Height (m)'); setVal('height', 3.0);
+                setTxt('l_scr', 'Screen Width (m)'); setVal('screen_width', 3.6);
+                setTxt('l_dist', 'Seating Dist (m)'); setVal('seat_dist', 4.2);
+                setTxt('l_scr_h', 'Screen Bottom (m)'); setVal('screen_bottom', 1.1);
+                setTxt('l_ear', 'Ear Height (cm)'); setVal('ear_height', 106);
+                setTxt('l_spk_h', 'Center Spkr Ht (cm)'); setVal('tweet_height', 81);
+                setTxt('l_spk_off', 'Spkr Offset (cm)'); setVal('speaker_offset', 0);
             } else {
-                document.getElementById('length').value = "6.0"; document.getElementById('width').value = "4.5"; document.getElementById('height').value = "3.0";
-                document.getElementById('screenWidth').value = "3.5"; document.getElementById('seatDist').value = "4.5";
-                document.getElementById('sofaWidth').value = "3.0"; document.getElementById('spkrHeight').value = "0.5"; document.getElementById('earHeight').value = "1.1";
+                setTxt('l_dim', 'Room Depth (ft)'); setVal('length', 24);
+                setTxt('l_wid', 'Room Width (ft)'); setVal('width', 16);
+                setTxt('l_hgt', 'Height (ft)'); setVal('height', 10);
+                setTxt('l_scr', 'Screen Width (ft)'); setVal('screen_width', 12);
+                setTxt('l_dist', 'Seating Dist (ft)'); setVal('seat_dist', 14);
+                setTxt('l_scr_h', 'Screen Bottom (ft)'); setVal('screen_bottom', 3.5);
+                setTxt('l_ear', 'Ear Height (in)'); setVal('ear_height', 42);
+                setTxt('l_spk_h', 'Center Spkr Ht (in)'); setVal('tweet_height', 32);
+                setTxt('l_spk_off', 'Spkr Offset (in)'); setVal('speaker_offset', 0);
             }
-        });
+        }
 
-        async function runCheck() {
-            const btn = document.querySelector('.run-btn');
-            btn.innerText = "CALCULATING...";
-
+        async function generateReport() {
             const data = {
-                client_name: document.getElementById('clientName').value,
-                project_name: document.getElementById('projectName').value,
-                integrator_name: document.getElementById('integratorName').value,
+                client_name: document.getElementById('client_name').value || "Valued Client",
+                project_name: document.getElementById('project_name').value || "Cinema Room",
+                integrator_name: document.getElementById('integrator_name').value || "Integrator",
                 measurement_unit: document.getElementById('unit').value,
+
                 length: parseFloat(document.getElementById('length').value),
                 width: parseFloat(document.getElementById('width').value),
                 height: parseFloat(document.getElementById('height').value),
-                screen_width: parseFloat(document.getElementById('screenWidth').value),
-                screen_aspect_ratio: parseFloat(document.getElementById('aspect').value),
-                screen_gain: parseFloat(document.getElementById('screenGain').value),
-                projector_lumens: parseInt(document.getElementById('lumens').value),
-                throw_ratio_min: parseFloat(document.getElementById('trMin').value),
-                throw_ratio_max: parseFloat(document.getElementById('trMax').value),
-                seating_distance: parseFloat(document.getElementById('seatDist').value),
-                sofa_width: parseFloat(document.getElementById('sofaWidth').value),
-                center_speaker_height: parseFloat(document.getElementById('spkrHeight').value),
-                ear_height: parseFloat(document.getElementById('earHeight').value)
+                wall_material: document.getElementById('material').value,
+
+                screen_width: parseFloat(document.getElementById('screen_width').value),
+                screen_bottom: parseFloat(document.getElementById('screen_bottom').value),
+                aspect_ratio: parseFloat(document.getElementById('aspect_ratio').value),
+
+                seat_dist: parseFloat(document.getElementById('seat_dist').value),
+                ear_height: parseFloat(document.getElementById('ear_height').value),
+                speaker_height: parseFloat(document.getElementById('tweet_height').value),
+                speaker_offset: parseFloat(document.getElementById('speaker_offset').value)
             };
+
+            const btn = document.querySelector('.btn-main');
+            const originalText = btn.innerText;
+            btn.innerText = "CALCULATING PHYSICS...";
 
             try {
                 const response = await fetch('/report', {
@@ -285,23 +316,29 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
                 });
-                if (!response.ok) throw new Error(await response.text());
-                const result = await response.json();
 
-                const r = result.calculations;
-                document.getElementById('res-throw').innerHTML = `<span class="${r.throw_status === 'PASS' ? 'pass' : 'fail'}">${r.throw_status}</span>`;
-                document.getElementById('res-bright').innerHTML = `<span class="${r.brightness_status === 'PASS' ? 'pass' : 'warn'}">${r.ftl} fL (${r.brightness_status})</span>`;
-                document.getElementById('res-offaxis').innerHTML = `<span class="${r.off_axis_status === 'PASS' ? 'pass' : 'fail'}">${r.off_axis_status}</span>`;
-                document.getElementById('res-audio').innerHTML = `<span class="${r.audio_status === 'PASS' ? 'pass' : 'fail'}">${r.audio_status}</span>`;
+                const res = await response.json();
 
-                document.getElementById('pdf-link').href = "/" + result.pdf_url;
                 document.getElementById('results').style.display = 'block';
-                document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
-                btn.innerText = "RUN V3 PHYSICS AUDIT";
-            } catch (e) {
-                alert("ERROR: " + e.message);
-                btn.innerText = "ERROR - TRY AGAIN";
+                document.getElementById('r_throw').innerHTML = format(res.results.throw);
+                document.getElementById('r_bright').innerText = res.results.brightness;
+                document.getElementById('r_rt60').innerHTML = format(res.results.rt60);
+                document.getElementById('r_spk_v').innerHTML = format(res.results.vertical_angle);
+                document.getElementById('r_spk_h').innerHTML = format(res.results.horizontal_angle);
+                document.getElementById('r_ear').innerHTML = format(res.results.ear_height);
+
+                document.getElementById('pdf_container').innerHTML =
+                    `<a href="/${res.pdf_url}" target="_blank" class="btn-pdf">DOWNLOAD CONSULTANT REPORT 📄</a>`;
+            } catch (error) {
+                alert("Server Error. Check console.");
             }
+            btn.innerText = originalText;
+        }
+
+        function format(status) {
+            if (status === 'PASS' || status === 'OPTIMAL') return `<span class="pass">${status}</span>`;
+            if (status === 'FAIL') return `<span class="fail">${status}</span>`;
+            return `<span class="warn">${status}</span>`;
         }
     </script>
 </body>
