@@ -70,25 +70,32 @@ def calculate_room_modes(L, W, H):
             modes[label].append(round(freq, 1))
     return modes
 
+# --- UPDATED DIAGRAM FUNCTION (COMPACT VERSION) ---
 def draw_room_diagram(room_len_ft, screen_width_ft, seat_dist_ft, req_throw_min):
-    d = Drawing(400, 200)
+    # Reduced height from 200 to 130 to fit on one page
+    d = Drawing(400, 130) 
     scale = 350 / max(room_len_ft, 20) 
     room_w = room_len_ft * scale
     room_h = 10 * scale 
-    y_start = 100 - (room_h / 2)
+    # Center the room vertically in the 130px space
+    y_start = 65 - (room_h / 2)
     
+    # Room Shell
     d.add(Rect(0, y_start, room_w, room_h, fillColor=colors.whitesmoke, strokeColor=colors.black))
     d.add(String(10, y_start - 10, f"DEPTH: {room_len_ft:.1f}'", fontSize=8))
 
+    # Screen
     screen_h_draw = (screen_width_ft / 1.77) * scale 
-    d.add(Line(5, 100 - (screen_h_draw/2), 5, 100 + (screen_h_draw/2), strokeWidth=4, strokeColor=colors.blue))
+    d.add(Line(5, 65 - (screen_h_draw/2), 5, 65 + (screen_h_draw/2), strokeWidth=4, strokeColor=colors.blue))
     
+    # Seat
     seat_x = seat_dist_ft * scale
-    d.add(Circle(seat_x, 100, 5, fillColor=colors.orange, strokeColor=colors.black))
-    d.add(String(seat_x - 10, 85, f"SEAT", fontSize=8))
+    d.add(Circle(seat_x, 65, 5, fillColor=colors.orange, strokeColor=colors.black))
+    d.add(String(seat_x - 10, 50, f"SEAT", fontSize=8))
 
+    # Throw Line
     req_x = req_throw_min * scale
-    d.add(Line(req_x, 100, 5, 100, strokeColor=colors.green, strokeDashArray=[2,2]))
+    d.add(Line(req_x, 65, 5, 65, strokeColor=colors.green, strokeDashArray=[2,2]))
     
     return d
 
@@ -119,7 +126,9 @@ def add_footer(canvas, doc):
 # ==========================================
 @app.post("/report")
 async def generate_report(room: RoomData):
-    # --- A. UNIT NORMALIZATION ---
+    # ... [Keep your existing Unit Normalization & Calculation code same as before] ...
+    # ... (Copy section A and B from your previous code) ...
+    # RE-PASTING THE CALCULATIONS FOR SAFETY SO YOU DON'T BREAK IT:
     if room.measurement_unit == "Meters":
         to_ft = 3.28084
         L_ft, W_ft, H_ft = room.length * to_ft, room.width * to_ft, room.height * to_ft
@@ -137,51 +146,45 @@ async def generate_report(room: RoomData):
         Ear_in, Tweet_in = room.ear_height, room.speaker_height
         Offset_in = room.speaker_offset
 
-    # --- B. CALCULATIONS ---
+    # Calculations
     ScreenH_ft = ScreenW_ft / room.aspect_ratio
     Area_sq_ft = ScreenW_ft * ScreenH_ft
     FTL = (room.projector_lumens * room.screen_gain) / Area_sq_ft
-    
     Req_Throw = ScreenW_ft * room.throw_ratio_min
     Throw_Pass = "PASS" if (L_ft - 1.5) >= Req_Throw else "FAIL"
-    
     ScreenCenter_ft = ScreenBot_ft + (ScreenH_ft / 2)
     Eye_ft = Ear_in / 12.0
     Vert_View_Angle = math.degrees(math.atan((ScreenCenter_ft - Eye_ft) / SeatDist_ft))
     Vert_View_Pass = "PASS" if Vert_View_Angle <= 15 else "WARN (>15\u00b0)"
-
     Offset_ft = Offset_in / 12.0
     Horiz_Angle = math.degrees(math.atan(Offset_ft / SeatDist_ft))
     Horiz_Pass = "OPTIMAL" if Horiz_Angle <= 10 else ("ACCEPTABLE" if Horiz_Angle <= 30 else "FAIL")
-
     speaker_tool = CenterChannelAnalyzer(standard="cedia")
     speaker_res = speaker_tool.calculate_vertical_angle(Ear_in, Tweet_in, SeatDist_ft)
-    
     ear_tool = EarHeightValidator(design_height_in=42)
     ear_res = ear_tool.validate(Ear_in)
-    
     rt60_tool = MaterialPresets()
     rt60_res = rt60_tool.calculate_rt60(L_ft, W_ft, H_ft, room.wall_material)
-    
     modes = calculate_room_modes(L_ft, W_ft, H_ft)
 
-    # --- C. PDF GENERATION ---
+    # --- C. PDF GENERATION (UPDATED LAYOUT) ---
     safe_client = "".join(x for x in room.client_name if x.isalnum() or x in " _-")
-    filename = f"Audit_{safe_client}.pdf"
+    # NEW FILENAME: Validation_Report instead of Audit
+    filename = f"Validation_Report_{safe_client}.pdf"
     
     doc = SimpleDocTemplate(filename, pagesize=letter)
     story = []
     styles = getSampleStyleSheet()
 
-    # --- NEW HEADER STRUCTURE ---
+    # HEADER
     story.append(Paragraph(f"<b>{room.integrator_name.upper()}</b>", styles['Normal']))
-    story.append(Spacer(1, 10))
-    story.append(Paragraph("AV SAFEGUARD DESIGN VALIDATION REPORT", styles['Heading1'])) # 
-    story.append(Paragraph("Pre-Construction Feasibility Assessment", styles['Heading2'])) # 
-    story.append(Spacer(1, 5))
+    story.append(Spacer(1, 5)) # Reduced spacer
+    story.append(Paragraph("AV SAFEGUARD DESIGN VALIDATION REPORT", styles['Heading1']))
+    story.append(Paragraph("Pre-Construction Feasibility Assessment", styles['Heading2']))
+    story.append(Spacer(1, 5)) 
     story.append(Paragraph(f"Client: {room.client_name} | Project: {room.project_name}", styles['Normal']))
-    story.append(Paragraph("<b>Validated by: AV Safeguard</b>", styles['Normal'])) # 
-    story.append(Spacer(1, 15))
+    story.append(Paragraph("<b>Validated by: AV Safeguard</b>", styles['Normal']))
+    story.append(Spacer(1, 10)) # Reduced spacer
 
     # SECTION 1: OPTICAL
     story.append(Paragraph("<b>1. OPTICAL ANALYSIS</b>", styles['Heading3']))
@@ -198,7 +201,7 @@ async def generate_report(room: RoomData):
         ('VALIGN', (0,0), (-1,-1), 'MIDDLE')
     ]))
     story.append(t1)
-    story.append(Spacer(1, 15))
+    story.append(Spacer(1, 10)) # Reduced spacer
 
     # SECTION 2: AUDIO
     story.append(Paragraph("<b>2. ACOUSTIC ANALYSIS</b>", styles['Heading3']))
@@ -216,12 +219,14 @@ async def generate_report(room: RoomData):
         ('VALIGN', (0,0), (-1,-1), 'MIDDLE')
     ]))
     story.append(t2)
-    story.append(Spacer(1, 15))
+    story.append(Spacer(1, 10)) # Reduced spacer
 
-    # SECTION 3: MODES
+    # SECTION 3: MODES & DIAGRAM
     story.append(Paragraph("<b>3. ROOM MODES & DIAGRAM</b>", styles['Heading3']))
     story.append(Paragraph(f"<b>Resonant Frequencies (Bass):</b> {modes['L']} Hz", styles['Normal']))
-    story.append(Spacer(1, 15))
+    story.append(Spacer(1, 10))
+    
+    # Draw Diagram (Now Compact)
     story.append(draw_room_diagram(L_ft, ScreenW_ft, SeatDist_ft, Req_Throw))
     
     # BUILD PDF WITH FOOTER
@@ -238,7 +243,6 @@ async def generate_report(room: RoomData):
             "ear_height": ear_res['status']
         }
     }
-
 @app.get("/")
 async def read_root():
     return FileResponse("static/index.html")
