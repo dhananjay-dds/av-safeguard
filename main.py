@@ -10,7 +10,7 @@ from typing import Literal
 # --- PDF LIBRARIES ---
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Frame, PageTemplate
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.graphics.shapes import Drawing, Rect, Line, Circle, String
 
@@ -38,7 +38,7 @@ class RoomData(BaseModel):
     
     # --- SCREEN & OPTICAL ---
     screen_width: float
-    screen_bottom: float = 3.5  # New: Height of screen bottom from floor
+    screen_bottom: float = 3.5
     aspect_ratio: float = 1.777
     screen_gain: float = 1.0
     projector_lumens: int = 2000
@@ -47,12 +47,12 @@ class RoomData(BaseModel):
     
     # --- AUDIO & SEATING ---
     seat_dist: float
-    ear_height: float = 42.0       # Inches
-    speaker_height: float = 32.0   # Inches (Tweeter)
-    speaker_offset: float = 0.0    # New: Horizontal offset in inches
+    ear_height: float = 42.0
+    speaker_height: float = 32.0
+    speaker_offset: float = 0.0
 
 # ==========================================
-# 2. V3.0 LEGACY LOGIC
+# 2. HELPER FUNCTIONS
 # ==========================================
 def check_hvac_noise(room_vol_ft3):
     if room_vol_ft3 > 5000:
@@ -77,24 +77,42 @@ def draw_room_diagram(room_len_ft, screen_width_ft, seat_dist_ft, req_throw_min)
     room_h = 10 * scale 
     y_start = 100 - (room_h / 2)
     
-    # Room Shell
     d.add(Rect(0, y_start, room_w, room_h, fillColor=colors.whitesmoke, strokeColor=colors.black))
     d.add(String(10, y_start - 10, f"DEPTH: {room_len_ft:.1f}'", fontSize=8))
 
-    # Screen
     screen_h_draw = (screen_width_ft / 1.77) * scale 
     d.add(Line(5, 100 - (screen_h_draw/2), 5, 100 + (screen_h_draw/2), strokeWidth=4, strokeColor=colors.blue))
     
-    # Seat
     seat_x = seat_dist_ft * scale
     d.add(Circle(seat_x, 100, 5, fillColor=colors.orange, strokeColor=colors.black))
     d.add(String(seat_x - 10, 85, f"SEAT", fontSize=8))
 
-    # Throw Line
     req_x = req_throw_min * scale
     d.add(Line(req_x, 100, 5, 100, strokeColor=colors.green, strokeDashArray=[2,2]))
     
     return d
+
+# --- FOOTER FUNCTION (THE LIABILITY SHIELD) ---
+def add_footer(canvas, doc):
+    canvas.saveState()
+    canvas.setFont('Helvetica', 6)
+    canvas.setFillColor(colors.grey)
+    
+    # Disclaimer Text (Perplexity Output)
+    disclaimer_lines = [
+        "ENGINEERING DISCLAIMER: This Design Validation Report presents theoretical calculations based on provided dimensions.",
+        "Real-world acoustic performance depends on construction quality, materials, and installation precision.",
+        "The Consultant assumes no liability for construction errors or defects. On-site verification is REQUIRED.",
+        "Valid only for design feasibility assessment. Not a guarantee of performance."
+    ]
+    
+    # Draw Footer at bottom of page
+    y_pos = 40
+    for line in disclaimer_lines:
+        canvas.drawCentredString(letter[0]/2.0, y_pos, line)
+        y_pos -= 8
+        
+    canvas.restoreState()
 
 # ==========================================
 # 3. MASTER API ENDPOINT
@@ -108,8 +126,6 @@ async def generate_report(room: RoomData):
         ScreenW_ft = room.screen_width * to_ft
         ScreenBot_ft = room.screen_bottom * to_ft
         SeatDist_ft = room.seat_dist * to_ft
-        
-        # Heights come in CM, convert to Inches
         Ear_in = room.ear_height * 0.3937
         Tweet_in = room.speaker_height * 0.3937
         Offset_in = room.speaker_offset * 0.3937
@@ -122,8 +138,6 @@ async def generate_report(room: RoomData):
         Offset_in = room.speaker_offset
 
     # --- B. CALCULATIONS ---
-    
-    # 1. Optical Physics
     ScreenH_ft = ScreenW_ft / room.aspect_ratio
     Area_sq_ft = ScreenW_ft * ScreenH_ft
     FTL = (room.projector_lumens * room.screen_gain) / Area_sq_ft
@@ -131,33 +145,25 @@ async def generate_report(room: RoomData):
     Req_Throw = ScreenW_ft * room.throw_ratio_min
     Throw_Pass = "PASS" if (L_ft - 1.5) >= Req_Throw else "FAIL"
     
-    # Vertical Viewing Angle (New Logic using Screen Bottom)
     ScreenCenter_ft = ScreenBot_ft + (ScreenH_ft / 2)
     Eye_ft = Ear_in / 12.0
     Vert_View_Angle = math.degrees(math.atan((ScreenCenter_ft - Eye_ft) / SeatDist_ft))
     Vert_View_Pass = "PASS" if Vert_View_Angle <= 15 else "WARN (>15\u00b0)"
 
-    # 2. Acoustic Physics (V3.1)
-    # Horizontal Audio Angle (New Logic)
     Offset_ft = Offset_in / 12.0
     Horiz_Angle = math.degrees(math.atan(Offset_ft / SeatDist_ft))
     Horiz_Pass = "OPTIMAL" if Horiz_Angle <= 10 else ("ACCEPTABLE" if Horiz_Angle <= 30 else "FAIL")
 
-    # Vertical Audio Angle
     speaker_tool = CenterChannelAnalyzer(standard="cedia")
     speaker_res = speaker_tool.calculate_vertical_angle(Ear_in, Tweet_in, SeatDist_ft)
     
-    # Ear Height
     ear_tool = EarHeightValidator(design_height_in=42)
     ear_res = ear_tool.validate(Ear_in)
     
-    # RT60
     rt60_tool = MaterialPresets()
     rt60_res = rt60_tool.calculate_rt60(L_ft, W_ft, H_ft, room.wall_material)
     
-    # Room Modes
     modes = calculate_room_modes(L_ft, W_ft, H_ft)
-    hvac_msg = check_hvac_noise(L_ft * W_ft * H_ft)
 
     # --- C. PDF GENERATION ---
     safe_client = "".join(x for x in room.client_name if x.isalnum() or x in " _-")
@@ -167,10 +173,14 @@ async def generate_report(room: RoomData):
     story = []
     styles = getSampleStyleSheet()
 
+    # --- NEW HEADER STRUCTURE ---
     story.append(Paragraph(f"<b>{room.integrator_name.upper()}</b>", styles['Normal']))
     story.append(Spacer(1, 10))
-    story.append(Paragraph("AV PHYSICS SAFEGUARD REPORT (V3.1)", styles['Heading1']))
+    story.append(Paragraph("AV SAFEGUARD DESIGN VALIDATION REPORT", styles['Heading1'])) # 
+    story.append(Paragraph("Pre-Construction Feasibility Assessment", styles['Heading2'])) # 
+    story.append(Spacer(1, 5))
     story.append(Paragraph(f"Client: {room.client_name} | Project: {room.project_name}", styles['Normal']))
+    story.append(Paragraph("<b>Validated by: AV Safeguard</b>", styles['Normal'])) # 
     story.append(Spacer(1, 15))
 
     # SECTION 1: OPTICAL
@@ -214,7 +224,8 @@ async def generate_report(room: RoomData):
     story.append(Spacer(1, 15))
     story.append(draw_room_diagram(L_ft, ScreenW_ft, SeatDist_ft, Req_Throw))
     
-    doc.build(story)
+    # BUILD PDF WITH FOOTER
+    doc.build(story, onFirstPage=add_footer, onLaterPages=add_footer)
 
     return {
         "pdf_url": filename,
