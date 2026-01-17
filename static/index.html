@@ -329,6 +329,8 @@
 
                 document.getElementById('pdf_container').innerHTML =
                     `<a href="/${res.pdf_url}" target="_blank" class="btn-pdf">DOWNLOAD CONSULTANT REPORT 📄</a>`;
+                // ADD THIS LINE:
+                document.getElementById("results").scrollIntoView({ behavior: "smooth", block: "start" });
             } catch (error) {
                 alert("Server Error. Check console.");
             }
